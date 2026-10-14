@@ -1,0 +1,111 @@
+PACKAGE VALIDATION
+
+Environment and isolation
+
+Validation used MATLAB 24.2.0.2833386 (R2024b) Update 4 on 64-bit Windows.
+The package was extracted into a clean directory containing spaces and tested
+in a fresh MATLAB session after restoredefaultpath. Examples and benchmark
+entry points located their dependencies within the package.
+
+Example checks
+
+The following commands run from the extracted package root:
+
+  addpath('examples');
+  result = run_example;
+  comparison = run_example('all');
+
+The Direct example returned tensions approximately
+[5.209314465; 3.800000000; 3.800000000; 6.876421727] N for requested force
+[-4.955131227; 0.055732486] N. Tension rows follow the anchor-column order.
+Independent equilibrium error was 2.51215e-15 N and the tension bounds were
+satisfied. All six methods passed the comparison example; the largest
+equilibrium error was 3.97205e-15 N. QP, ACTA and X-ACTA returned positive
+native exit flags.
+
+Small benchmark and saved-data checks
+
+  addpath('benchmark');
+  capture = run_benchmark(fullfile(pwd,'smoke_results'));
+  tables = reproduce_saved_results(fullfile(pwd,'smoke_results'), ...
+      fullfile(pwd,'smoke_tables'));
+
+Use new output directories. The 192-request capture completed with status
+raw_complete. Expected method failures were retained as data. Saved-data
+reproduction completed with status passed and unchanged input hashes.
+The nine published CSV tables were reproduced exactly from the same saved
+observations. Replay invoked no solver or performance-timing calls.
+The entry points restored the caller's working directory and MATLAB path;
+the worker pool created for the capture was closed. The Direct example also
+passed after saved-data replay. Both absolute and relative paths were checked.
+
+Full saved-data verification
+
+The reported full dataset contains 30,965,760 requests. Hash-checked analysis
+with the interior-force and actual-tension norm options reproduced all ten
+timing, quality, domain and paired-force CSV tables. Norm statistics,
+exclusions and readback tables agreed with the supplied results. ICFM and QP
+retained 24,433,774 pairs; VTDA-L2 retained 24,375,822 after 57,952 exclusions.
+The analysis recomputed norms and physical acceptance from the saved tension
+vectors. Input hashes were unchanged and no solver or performance-timing
+calls occurred during this saved-data analysis.
+
+Scope and interpretation
+
+The example and 192-request test verify execution and data handling; they do
+not independently repeat the full experiment or establish its timing ratios.
+Reported performance statistics use the full saved capture. A new full capture
+is an explicit, computationally expensive operation described in benchmark/.
+Observed maxima are measurements, not worst-case execution guarantees.
+
+Package verification checks that numerical operations, solver settings and
+timing boundaries match those used for the reported experiment. This checks
+the identity of the measured implementation; it does not establish equivalence
+to the original method authors' software.
+
+provenance/SOURCE_MANIFEST.csv identifies the supplied MATLAB source files.
+provenance/PACKAGE_MANIFEST.csv records package-file sizes and SHA-256 hashes.
+provenance/FULL_DATA_INVENTORY.csv identifies the separately supplied full
+dataset, including the source snapshots recorded with that experiment.
+
+Forward-kinematics verification
+
+The package was extracted into a new directory containing spaces and checked
+in a fresh MATLAB session after restoredefaultpath. The documented command
+  addpath('examples');
+  position_result = run_forward_kinematics_example;
+passed for five known positions (the centre and one in each quadrant).
+The largest example position error was 0 mm.
+The unchanged run_example and run_example('all') commands also passed.
+
+Against the exact source extracted from the selected 2024 controller block, the
+packaged function returned identical values for a 25-by-25 grid of 625 known
+positions, 128 perturbed-length inputs, ten invalid-input cases and a valid
+recovery call. The grid spans [1,629] mm on each coordinate; its largest
+position error was 1.09255197089925e-11 mm. The perturbed-input
+comparison checks source preservation, not physical position accuracy.
+Invalid-input comparisons use MATLAB's NaN-aware equality test. Of those ten
+cases, 4 produced complex outputs and
+1 produced outputs containing NaN; these
+categories may overlap. These checks confirm unchanged MATLAB source behavior,
+not physically valid position estimates. An all-NaN input returns NaNs.
+No previous position is retained and no status flag is returned.
+
+Standalone MATLAB can produce complex roots for negative radicands. The
+experimental generated real-valued controller produces NaN for those roots
+and omits the affected pairs. The MATLAB source is preserved without adding
+guards; agreement with the generated controller is not asserted outside the
+real-intersection domain. The known-position checks use that domain.
+
+Executable-statement comparison confirms that only the function name,
+comments and whitespace differ from the identified controller script. These checks
+establish source preservation and offline geometric behavior; they do not
+measure experimental position accuracy or controller execution time.
+
+All seven previously supplied numerical source files, all benchmark files,
+the existing tension distribution example and FULL_DATA_INVENTORY.csv are
+byte-for-byte unchanged (17 files checked). No benchmark was rerun, and no
+saved benchmark result was modified. Forward kinematics remains outside all
+reported tension distribution timing boundaries.
+
+MATLAB used for these checks: 24.2.0.2833386 (R2024b) Update 4.

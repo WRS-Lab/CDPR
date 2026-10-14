@@ -1,0 +1,29 @@
+FORWARD-KINEMATICS SOURCE IDENTIFICATION
+
+Source model: CompleteSystem_RL_Final.slx.original
+Experimental controller: 2024 (selected by the project author)
+Active block: Actual Position/forward kinematics 2
+Block SID: 5268
+Chart member: simulink/stateflow/chart_272.xml
+Source function: forward_kinematics_actual_position
+Public function: src/forward_kinematics.m
+Model SHA-256: 4784bbbcaf59da2933b98a0047a8a9724ff85dffb6291aede673e19d29f63ab2
+Decoded script SHA-256: 0b6de7d17cba2849b9222aae41890a065c692263661eaae168587ab67f7603e5
+
+The script hash is over the decoded XML script text encoded as UTF-8,
+without line-ending or whitespace normalization. The public function name,
+comments and whitespace are adapted for standalone use. All executable
+statements after the function declaration are preserved, including operation
+order, numeric constants, unused diagonal calculations and NaN handling.
+No persistent state or replacement failure-handling rule is introduced.
+Negative square roots can be complex in standalone MATLAB; the generated
+real-valued controller uses real square roots and rejects resulting NaNs.
+
+Encoder conversion and reference-offset calibration occur upstream and the
+frame-centering translation occurs downstream; neither is inserted into
+the extracted function. The example explicitly converts known cable lengths
+to the calibrated motor-displacement inputs.
+
+The seven source files used by the tension distribution benchmark, all
+benchmark files and FULL_DATA_INVENTORY.csv are byte-for-byte unchanged.
+Forward kinematics is outside the benchmark's timing boundaries.
