@@ -4,11 +4,11 @@ function WDM = wt_qp_bounded(WDM,P,F)
 %   and lim_inf<=T<=lim_sup using MATLAB quadprog. Both bounds are retained
 %   on every solve; there is no upper-bound-removal fallback.
 %
-% INPUTS (the benchmark planar four-cable setup)
+% INPUTS (the planar four-cable setup)
 %   WDM.param.M       2-by-4 anchor positions [mm], in fixed CCW cable order.
 %   WDM.param.lim_inf  4-by-1 lower tension bounds [N]; all equal and positive.
 %   WDM.param.lim_sup  4-by-1 upper tension bounds [N]; all equal, above lim_inf.
-%   WDM.param.TOLL     Numerical zero/geometric cutoff (benchmark value 1e-14).
+%   WDM.param.TOLL     Numerical zero/geometric cutoff (example value 1e-14).
 %   WDM.verbose       Logical scalar; use false for numerical calls.
 %   P                 2-by-1 known platform position [mm].
 %   F                 2-by-1 requested Cartesian force [N].
@@ -51,8 +51,8 @@ for cable=1:size(W,2)
     if length_cable>WDM.param.TOLL
         W(:,cable)=W(:,cable)/length_cable;
     else
-        % Retain the benchmark's zero-length-cable convention. Such poses
-        % are reported separately from the strictly interior domain.
+        % A zero-length cable has no unit direction. This pose lies outside
+        % the strictly interior geometric domain.
         W(:,cable)=0;
     end
 end

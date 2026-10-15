@@ -36,7 +36,7 @@ function points_mean_final  = forward_kinematics(M1,M2,M3,M4)
 %   For frame-centred coordinates use P-[315;315]. The tension distribution
 %   routines use cable order [1 4 3 2] relative to this controller order.
 %   Reorder cable-indexed quantities when connecting those two conventions.
-%   Forward kinematics is excluded from all reported TDA execution times.
+%   Tension distribution uses this position estimate as a separate input.
 %
 %   See also RUN_FORWARD_KINEMATICS_EXAMPLE.
 

@@ -5,11 +5,11 @@ function WDM=wt_pott(WDM,P,F)
 %   nested steps. Lower-bound violations are tested before upper violations.
 %   This is not a quadprog call and is not an L2-optimality certificate.
 %
-% INPUTS (the benchmark planar four-cable setup)
+% INPUTS (the planar four-cable setup)
 %   WDM.param.M       2-by-4 anchor positions [mm], in fixed CCW cable order.
 %   WDM.param.lim_inf  4-by-1 lower tension bounds [N]; all equal and positive.
 %   WDM.param.lim_sup  4-by-1 upper tension bounds [N]; all equal, above lim_inf.
-%   WDM.param.TOLL     Numerical zero/geometric cutoff (benchmark value 1e-14).
+%   WDM.param.TOLL     Numerical zero/geometric cutoff (example value 1e-14).
 %   WDM.verbose       Logical scalar; use false for numerical calls.
 %   P                 2-by-1 known platform position [mm].
 %   F                 2-by-1 requested Cartesian force [N].

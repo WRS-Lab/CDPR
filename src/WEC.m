@@ -5,11 +5,11 @@ function [F_new, is_scaled] = WEC(WDM,P,F)
 %   intersects the SIGNED force line with that polygon and adjusts the
 %   force by the inward TOLL_WEC margin when needed.
 %
-% INPUTS (the benchmark planar four-cable setup)
+% INPUTS (the planar four-cable setup)
 %   WDM.param.M       2-by-4 anchor positions [mm], in fixed CCW cable order.
 %   WDM.param.lim_inf  4-by-1 lower tension bounds [N]; all equal and positive.
 %   WDM.param.lim_sup  4-by-1 upper tension bounds [N]; all equal, above lim_inf.
-%   WDM.param.TOLL     Numerical zero/geometric cutoff (benchmark value 1e-14).
+%   WDM.param.TOLL     Numerical zero/geometric cutoff (example value 1e-14).
 %   WDM.verbose       Logical scalar; use false for numerical calls.
 %   P                 2-by-1 known platform position [mm].
 %   F                 2-by-1 requested Cartesian force [N].
@@ -18,7 +18,7 @@ function [F_new, is_scaled] = WEC(WDM,P,F)
 % See docs/FUNCTION_REFERENCE.txt for the complete common contract and checks.
 %
 % Also requires WDM.param.TOLL_WEC, an inward force margin [N] (1e-9 in the
-% benchmark setup). Equal cable bounds are required: only their first entries
+% example setup). Equal cable bounds are required: only their first entries
 % are used to build the four-cable box. No tensions are returned by WEC.
 %
 % OUTPUTS

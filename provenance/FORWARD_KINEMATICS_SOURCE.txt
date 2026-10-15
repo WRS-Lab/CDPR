@@ -1,7 +1,7 @@
 FORWARD-KINEMATICS SOURCE IDENTIFICATION
 
 Source model: CompleteSystem_RL_Final.slx.original
-Experimental controller: 2024 (selected by the project author)
+Experimental controller: 2024
 Active block: Actual Position/forward kinematics 2
 Block SID: 5268
 Chart member: simulink/stateflow/chart_272.xml
@@ -23,7 +23,3 @@ Encoder conversion and reference-offset calibration occur upstream and the
 frame-centering translation occurs downstream; neither is inserted into
 the extracted function. The example explicitly converts known cable lengths
 to the calibrated motor-displacement inputs.
-
-Forward kinematics is outside the benchmark's timing boundaries and does
-not supply positions to the numerical comparison. Solver configurations
-and their relationship to the saved data are documented in benchmark/.

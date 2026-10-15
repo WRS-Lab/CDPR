@@ -1,43 +1,41 @@
 # Tension Distribution for a Planar Four-Cable Robot
 
-MATLAB implementations and reproducible comparisons for computing cable tensions subject to force equilibrium and lower/upper tension bounds.
+MATLAB implementations and runnable examples for computing cable tensions subject to force equilibrium and lower and upper tension bounds.
 
-The proposed **Direct Method (DM)** minimizes the tension L2 norm for a feasible force request by evaluating at most two scalar candidates. Its geometric derivation assumes four counterclockwise-ordered anchors and a platform position strictly inside their convex frame.
+The proposed **Direct Method (DM)** minimizes the cable-tension L2 norm for a feasible force request by evaluating at most two scalar candidates. It assumes four counterclockwise-ordered anchors and an end-effector position strictly inside their convex frame.
 
 ## Quick start
 
-The small example needs **MATLAB only**. The package was tested with MATLAB R2024b Update 4; no Python, compilation, or additional downloads are needed for this example.
-
 1. Download and extract the repository ZIP, or clone the repository.
-2. Set MATLAB's **Current Folder** to the folder containing this README and run:
+2. Open MATLAB and set its **Current Folder** to the folder containing this README.
+3. Run:
 
 ```matlab
 addpath('examples');
 result = run_example;
 ```
 
-The example displays the requested force, four computed cable tensions, achieved force, equilibrium error, and whether the tension bounds are satisfied. It also returns these values in `result`.
+This example requires **MATLAB only**. It displays the requested force, four computed cable tensions, achieved force, equilibrium error, and whether the tension bounds are satisfied. These values are also returned in `result`.
 
-**Expected result:** all example checks pass, tension bounds are satisfied, and equilibrium error is below `1e-8` N. The example uses a known feasible request, positions in **mm**, forces and tensions in **N**, and equal cable bounds of **3.8–25 N**. It records no performance timings.
+The example uses a known feasible request, positions in **mm**, forces and tensions in **N**, and cable bounds of **3.8–25 N**. All example checks should pass, with equilibrium error below `1e-8` N.
 
-### Experimental forward kinematics
+## How the Direct Method works
 
-Run the small position-reconstruction example with MATLAB:
+Given an end-effector position and a feasible force request, the method:
 
-```matlab
-addpath('examples');
-position_result = run_forward_kinematics_example;
-```
+1. Forms the cable-direction matrix and a particular tension solution.
+2. Expresses the remaining freedom using a two-dimensional null-space basis.
+3. Converts the cable-tension bounds into feasible scalar intervals.
+4. Evaluates at most two clipped scalar candidates and returns the minimum-norm tension vector in the original cable order.
 
-The example displays cable lengths, calibrated motor displacements, reconstructed positions and errors for five known positions. All quantities are in **mm**. The [function help](src/forward_kinematics.m) documents the controller's cable numbering, coordinate system and invalid-intersection behavior. The example uses positive lengths with real circle intersections; check that the returned position is real and finite when using other inputs.
+See [`src/wt_direct.m`](src/wt_direct.m) for the implementation and references to the manuscript's equations and Algorithm 1. The [function reference](docs/FUNCTION_REFERENCE.txt) explains inputs, outputs, units, assumptions, and status fields.
 
-**Forward kinematics is excluded from the reported tension distribution execution times.** The benchmark supplies the end-effector position as an input.
-
-### Compare all six methods
+## Try the other methods
 
 With **Optimization Toolbox** installed, run:
 
 ```matlab
+addpath('examples');
 comparison = run_example('all');
 ```
 
@@ -50,62 +48,32 @@ comparison = run_example('all');
 | Analytic-centre ACTA | [`wt_acta.m`](src/wt_acta.m) |
 | Extended X-ACTA | [`wt_xacta.m`](src/wt_xacta.m) |
 
-The first five methods receive a shared wrench-exertion-capability (WEC) target; X-ACTA receives the original force. WEC leaves this example's feasible request unchanged. ACTA and X-ACTA are equation-based MATLAB implementations, not verified copies of the original authors' software. Their analytic-centre objectives differ from DM's tension L2 objective. See the [method sources](docs/METHOD_SOURCES.txt) for attribution.
+The first five methods receive the same wrench-exertion-capability (WEC) target; X-ACTA receives the original force. WEC leaves this example's feasible request unchanged. ACTA and X-ACTA use analytic-centre objectives, which differ from DM's tension L2 objective. They are equation-based MATLAB implementations; equivalence to the original authors' software has not been established. The [method sources](docs/METHOD_SOURCES.txt) provide attribution.
 
-Bounded QP uses MATLAB's **active-set** algorithm with every cable initialized at its minimum tension: `x0 = 3.8*ones(4,1)` in this example. The solver performs a feasibility phase when this initial vector does not satisfy force equilibrium.
+Bounded QP uses MATLAB's **active-set** algorithm, starting every cable at its minimum tension: `x0 = 3.8*ones(4,1)` in this example. The solver performs a feasibility phase when this initial vector does not satisfy force equilibrium.
 
-## Requirements
+## Experimental forward kinematics
 
-| Task | Dependencies |
-| --- | --- |
-| Direct example | MATLAB |
-| Forward-kinematics example | MATLAB |
-| All-method example | MATLAB and Optimization Toolbox |
-| New benchmark capture | MATLAB, Optimization Toolbox, Parallel Computing Toolbox, and Java |
-| Saved-data reproduction | Base MATLAB and Java; original saved data supplied separately |
+Reconstruct five known positions from cable lengths with this MATLAB-only example:
 
-## Package guide
+```matlab
+addpath('examples');
+position_result = run_forward_kinematics_example;
+```
+
+It displays cable lengths, calibrated motor displacements, reconstructed positions, and position errors, all in **mm**. The [function help](src/forward_kinematics.m) documents the controller's cable numbering, coordinate system, fixed adjacent circle pairs, and invalid-intersection handling. The example uses positive lengths with real circle intersections; check that the returned position is real and finite for other inputs.
+
+Forward kinematics supplies a position estimate separately. Each tension distribution function receives the end-effector position as an input.
+
+## Repository guide
 
 | Location | Contents |
 | --- | --- |
-| [`src/`](src/) | Tension distribution, WEC and forward-kinematics functions, with input/output contracts in their help text |
-| [`examples/`](examples/) | Tension distribution and forward-kinematics examples with independent checks |
-| [Function reference](docs/FUNCTION_REFERENCE.txt) | Dimensions, units, cable ordering, bounds, and method-specific statuses |
-| [Method sources](docs/METHOD_SOURCES.txt) | Comparison methods and their references |
-| [Validation](docs/VALIDATION.txt) | Tested commands, results, and scope of verification |
-| [`benchmark/`](benchmark/README.md) | Capture and saved-data reproduction instructions, settings, and costs |
-| [`provenance/`](provenance/) | SHA-256 inventories for package source and published-run data |
-| [Notices](NOTICES.txt) | Source attribution and license information |
+| [`src/`](src/) | Tension distribution, WEC, and forward-kinematics functions |
+| [`examples/`](examples/) | Small runnable examples with equilibrium, bound, and position checks |
+| [Function reference](docs/FUNCTION_REFERENCE.txt) | Dimensions, units, cable ordering, solver settings, and returned statuses |
+| [Method sources](docs/METHOD_SOURCES.txt) | Mathematical references and implementation scope |
+| [`provenance/`](provenance/) | Source identification and file hashes |
+| [Notices](NOTICES.txt) | Attribution and license information |
 
-Returned tensions follow the original anchor-column order. A finite result or a native status flag alone does not establish success; independently check equilibrium and tension bounds. WEC can change an infeasible request's magnitude or signed direction, some force lines have no target, and zero requests have a separate fallback. Read the [function reference](docs/FUNCTION_REFERENCE.txt) before supplying different inputs.
-
-## Benchmark reproduction
-
-The documented saved benchmark used QP's **interior-point-convex** algorithm with `x0=[]`. Its reported timings and success counts do not characterize the active-set implementation. New captures use the current source; see the [benchmark instructions](benchmark/README.md) for reproducing the saved solver configuration. Saved-data analysis does not rerun QP.
-
-### Small capture and saved-data replay
-
-Start with the **192-request smoke test**, which uses two process workers. Then reconstruct its tables from the saved outputs:
-
-```matlab
-addpath('benchmark');
-capture = run_benchmark(fullfile(pwd,'smoke_results'));
-tables = reproduce_saved_results(fullfile(pwd,'smoke_results'), ...
-    fullfile(pwd,'smoke_tables'));
-```
-
-Both output directories must be new. Worker startup can dominate this small capture. Saved-data reproduction copies its inputs and makes no new solver or performance-timing calls.
-
-### Full experiment: substantial computational cost
-
-The full experiment has **30,965,760 requests** and eight recorded timing series. Its measured capture loop took **5,843.6 seconds (about 97.4 minutes)** on eight workers of the reported i9-12900K system, excluding startup and later analysis.
-
-- Published raw data: approximately **10.52 GB**.
-- New full capture: conservatively allow **40 GB** of free disk space.
-- Independent saved-data replay: allow a further **12 GB** and several GB of working memory.
-
-These are resource estimates, not completion-time guarantees. Read the [full benchmark instructions](benchmark/README.md) before starting a full capture or reproducing the published results from the separately supplied data archive. The example and default smoke command never start a full run. Large raw data and generated results are excluded from this repository and package.
-
-## Validation
-
-The clean-extraction examples, 192-request smoke capture, and saved-data replay pass the documented checks. Setup and independent physical checks run outside the per-method timing boundaries. See [validation details](docs/VALIDATION.txt) for tested commands, numerical results, and the scope of full-data verification.
+Returned tensions follow the anchor-column order. For other inputs, check the returned status, force equilibrium, and tension bounds together. WEC may change the requested force or return no valid target; its interface and assumptions are described in the function reference.

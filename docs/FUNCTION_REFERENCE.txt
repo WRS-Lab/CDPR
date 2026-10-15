@@ -7,15 +7,15 @@ Six tension distribution functions use OUT = name(WDM,P,F). WEC uses
 Toolbox; the other tension distribution routines, WEC and forward kinematics
 use base MATLAB. Forward kinematics has a separate interface, described below.
 
-The benchmark geometry has two translational force coordinates and four cables.
+The example geometry has two translational force coordinates and four cables.
 WDM.param.M is 2-by-4, with columns in fixed counterclockwise (CCW) order:
   [-315  315  315 -315; -315 -315 315 315] mm.
 P is a known 2-by-1 position in mm, and F is a 2-by-1 requested force in N.
 Each column of W points from P to its anchor and has unit length. Equilibrium
 uses W*T=F; F is the requested cable-resultant force, not its negative.
-The numerical comparison uses positions strictly inside the rectangular frame;
-frame-edge/zero-length-cable cases are separate stress cases, not the Direct
-method's ordinary geometric domain. The benchmark does not call forward kinematics; P is supplied as a known input.
+The Direct Method assumes positions strictly inside the rectangular frame;
+frame-edge and zero-length-cable cases lie outside its geometric domain.
+P is supplied as a known input to each tension distribution function.
 
 Supply fresh WDM.param.lim_inf=3.8*ones(4,1) and lim_sup=25*ones(4,1), in N,
 WDM.param.TOLL=1e-14, WDM.param.TOLL_WEC=1e-9, and WDM.verbose=false.
@@ -23,7 +23,7 @@ The common contract uses equal positive lower bounds and equal upper bounds.
 Direct, ICFM branching and WEC read the first bound as a common scalar;
 do not use their interfaces to infer support for unequal bounds.
 X-ACTA additionally validates general n-by-m full-row-rank geometry and scalar
-or per-cable bounds, but that broader interface was not the planar comparison.
+or per-cable bounds, beyond the planar geometry used in the example.
 TOLL is a numerical zero/geometric cutoff, not the common physical
 acceptance tolerance. M and P must use the same length unit. Changing force or
 tension units requires reconsidering dimensional options such as delta and
@@ -93,9 +93,6 @@ are the installed-version defaults. Validated environment: MATLAB R2024b
 Update 4, Optimization Toolbox 24.2. Different library versions can alter
 iteration counts and numerical results.
 
-The documented saved benchmark instead used interior-point-convex with x0=[].
-That algorithm ignores user-supplied initial points. Those measurements are
-not active-set results; see benchmark/README.md for the saved configuration.
 Native exitflag and iter are returned; T may be empty or a last iterate on failure.
 objective is 0.5*T'*T [N^2]. resid is native firstorderopt when available, otherwise
 NaN. primal_resid is the force infinity norm [N]; bound_violation is in N.
@@ -192,7 +189,7 @@ increase magnitude or reverse direction, not just shorten a positive ray.
 A nonintersecting line returns a NaN force and warning. An infeasible zero command
 uses a nonzero fallback; finite outputs still need attainable-force verification.
 IS_SCALED is false only for the unchanged nonzero branch; unchanged zero retains
-true. Use norm(F_NEW-F,2) for actual change (1e-12 N in the saved comparison).
+true. Use norm(F_NEW-F,2) to measure the actual force change in N.
 No tensions are returned. The geometry/hull can error on degeneracy. verbose=true
 opens a diagnostic plot and pauses execution, so keep it false in numerical use.
 
@@ -232,7 +229,8 @@ does not certify measurement accuracy. Diagonal-pair candidates (1,3) and
 (2,4) are calculated using the source constant 892 mm, but neither those
 candidates nor their selection affect the returned adjacent-pair mean.
 The routine estimates position only; it neither computes tensions nor checks
-tension bounds. Its execution is excluded from the reported TDA timings.
+tension bounds. Supply its position estimate separately to the tension
+distribution functions.
 
 Example: addpath('examples'); position_result = run_forward_kinematics_example;
 Source identification: provenance/FORWARD_KINEMATICS_SOURCE.txt.

@@ -1,7 +1,7 @@
 function result = run_example(mode)
 %RUN_EXAMPLE Display and check one planar four-cable tension distribution.
 %   RESULT = RUN_EXAMPLE runs the proposed Direct Method (DM). It requires
-%   only MATLAB. RESULT = RUN_EXAMPLE('all') also runs the five comparison
+%   only MATLAB. RESULT = RUN_EXAMPLE('all') also runs the five other
 %   methods and WEC; bounded QP requires Optimization Toolbox.
 %
 %   MODE is 'direct' (default) or 'all'. The example creates a known feasible
@@ -115,7 +115,6 @@ for k = 1:numel(functions)
     if isfield(output,'exitflag'), fprintf('  Native exit flag:      %g\n',native_flag); end
     fprintf('  All example checks passed: %s\n',yes_no(passed));
 end
-fprintf('\nThis example produces no benchmark timing observations.\n');
 end
 
 function value = yes_no(condition)

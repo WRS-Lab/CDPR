@@ -2,7 +2,7 @@ METHOD SOURCES
 
 Implementation scope
 
-src/ contains the tension distribution comparison functions, WEC preprocessing
+src/ contains the tension distribution functions, WEC preprocessing
 and the experimental forward-kinematics function. provenance/SOURCE_MANIFEST.csv lists source filenames, sizes and
 SHA-256 hashes. Function help text and FUNCTION_REFERENCE.txt describe the
 interfaces, assumptions, solver settings and returned statuses.
@@ -46,9 +46,7 @@ The numerical backend is MATLAB quadprog, active-set, Optimization Toolbox
 24.2 with MATLAB R2024b Update 4. The local wrapper solves min 0.5*T'*T with
 equality and both box bounds, starting each cable at its lower tension bound.
 See FUNCTION_REFERENCE for the initialization, feasibility phase and options.
-The documented saved benchmark used interior-point-convex with x0=[]. Its
-measurements do not describe active-set performance. MATLAB documents that
-interior-point-convex ignores user-supplied initial points:
+MATLAB quadprog documentation:
 https://www.mathworks.com/help/releases/R2024b/optim/ug/quadprog.html
 The commercial MATLAB/toolbox implementation is not included here.
 
@@ -64,7 +62,7 @@ The infeasible-start Newton method follows S. Boyd and L. Vandenberghe,
 Convex Optimization (2004), Algorithm 10.2, p. 531, with block elimination
 from Section 10.4.2.
 Cold starts, finite iteration/line-search limits and numerical safeguards are
-implementation choices, not a claim to reproduce the authors' program or timings.
+implementation choices, not a claim to reproduce the authors' program.
 
 X-ACTA -- wt_xacta.m
 
@@ -97,7 +95,7 @@ intersections, omitting points containing NaN. The standalone MATLAB and
 real-valued generated-controller domain behavior is documented in its help.
 The public function name and comments are adapted for standalone use; the
 executable calculation is preserved. Model and script hashes are recorded in
-provenance/FORWARD_KINEMATICS_SOURCE.txt. It is not a timed comparison method.
+provenance/FORWARD_KINEMATICS_SOURCE.txt.
 
 Attribution limits
 
