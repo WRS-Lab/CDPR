@@ -1,13 +1,13 @@
 # Documentation
 
-For a first look, start with the [small runnable examples](../README.md#quick-start). They display the requested force, cable tensions, equilibrium error, and tension-bound checks.
+The [examples](../README.md#quick-start) demonstrate tension distribution and forward kinematics.
 
-| Read this | To understand |
+| Document | Content |
 | --- | --- |
 | [Function reference](FUNCTION_REFERENCE.md) | Inputs, units, cable numbering, returned values, and solver statuses |
-| [Method sources](METHOD_SOURCES.md) | The mathematical references and the scope of each implementation |
-| [Forward kinematics](FUNCTION_REFERENCE.md#experimental-forward-kinematics) | How motor displacements become a position estimate, including circle-pair selection |
+| [Method sources](METHOD_SOURCES.md) | Mathematical references and implementation scope |
+| [Forward kinematics](FUNCTION_REFERENCE.md#experimental-forward-kinematics) | Position estimation from motor displacements and circle-pair selection |
 
-The function reference starts with the shared interface. Expand the numerical-detail sections only when you need the solver options or convergence equations.
+Solver options and convergence equations appear in expandable sections of the function reference.
 
-[Back to the project overview](../README.md)
+[Project overview](../README.md)

@@ -1,8 +1,8 @@
 # Function reference
 
-The tension distribution functions calculate four cable tensions from a known end-effector position and a requested force. Forward kinematics performs the separate task of estimating position from calibrated motor displacements.
+The tension distribution functions calculate four cable tensions from a known end-effector position and a requested force. Forward kinematics estimates position from calibrated motor displacements.
 
-**Start with the [runnable examples](../README.md#quick-start).** This page explains the inputs, returned values, and how to interpret them. Numerical details are grouped under each method.
+The [runnable examples](../README.md#quick-start) demonstrate these interfaces. Inputs, outputs, and numerical details are specified below.
 
 - [Inputs and coordinates](#inputs-and-coordinates)
 - [Outputs and success checks](#outputs-and-success-checks)
@@ -17,13 +17,13 @@ The tension distribution functions calculate four cable tensions from a known en
 
 ## Inputs and coordinates
 
-The six tension distribution functions share the same calling pattern:
+The six tension distribution functions use a common calling convention:
 
 ```matlab
 output = wt_direct(parameters, position, requested_force);
 ```
 
-Replace `wt_direct` with the method you want to use. The parameter structure is called `WDM`, the position `P`, and the requested force `F` in the source files. **Only bounded QP needs Optimization Toolbox.** The other functions use base MATLAB; their custom helper functions are included in their source files.
+Any of the six methods can replace `wt_direct`. The source files denote the parameter structure, position, and requested force by `WDM`, `P`, and `F`. Only bounded QP requires Optimization Toolbox; the other functions use base MATLAB. Custom helpers are included in each source file.
 
 | Input | Shape | Units | Meaning |
 | --- | --- | --- | --- |
@@ -38,7 +38,7 @@ Replace `wt_direct` with the method you want to use. The parameter structure is 
 
 ### Cable numbering
 
-The example uses a frame-centred coordinate system: **+x points right and +y points up**. Cables run counterclockwise, starting at the bottom-left anchor.
+The example uses frame-centred coordinates, with +x to the right and +y upwards. Cables are numbered counterclockwise from the bottom-left anchor.
 
 | Cable | Anchor | Position `[x, y]` in mm |
 | --- | --- | --- |
@@ -51,22 +51,22 @@ The example uses a frame-centred coordinate system: **+x points right and +y poi
 WDM.param.M = [-315 315 315 -315; -315 -315 315 315];
 ```
 
-Each column of the direction matrix `W` is a unit vector pointing from the end effector towards its anchor. Force equilibrium is **`W*T = F`**: `F` is the cable-resultant force, not its negative. Returned tensions keep the original anchor-column order.
+Each column of `W` is a unit vector from the end effector to its anchor. Force equilibrium is `W*T = F`, where `F` is the cable-resultant force, not its negative. Returned tensions follow the original anchor-column order.
 
-The Direct Method assumes a position **strictly inside** the frame. Frame-edge and zero-length-cable cases lie outside its geometric domain. Each tension distribution function receives the position directly; it does not call forward kinematics.
+The Direct Method requires a position strictly inside the frame; frame-edge and zero-length-cable cases lie outside its geometric domain. All tension distribution functions receive position as an input and do not call forward kinematics.
 
 ### Bounds and units
 
-The shared four-cable interface assumes equal positive lower bounds and equal upper bounds. Direct, ICFM branching, and WEC read the first bound as a common scalar; their interfaces do not establish support for unequal bounds. X-ACTA additionally validates general full-row-rank `n × m` geometry and scalar or per-cable bounds.
+The four-cable interface assumes equal positive lower bounds and equal upper bounds. Direct, ICFM branching, and WEC use the first bound as a common scalar; support for unequal bounds is not established. X-ACTA also validates general full-row-rank `n × m` geometry and scalar or per-cable bounds.
 
-Use the same length unit for `M` and `P`. Changing force or tension units also requires reconsidering dimensional settings such as `delta` and `TOLL_WEC`. `TOLL` is a numerical/geometric cutoff, **not** the force-acceptance tolerance.
+`M` and `P` must use the same length unit. Changes in force or tension units require corresponding review of dimensional settings such as `delta` and `TOLL_WEC`. `TOLL` is a numerical/geometric cutoff, not the force-acceptance tolerance.
 
 <details>
 <summary>Passing parameters between calls</summary>
 
-Build each method call from a fresh parameter structure, rather than from another method's returned structure. Returned structures preserve incoming fields. In particular, VTDA-L2 can return without overwriting `T`; a tension vector left over from an earlier call could otherwise be mistaken for a new solution.
+Each call requires a fresh parameter structure, not another method's returned structure. Returned structures preserve incoming fields. VTDA-L2 can return without overwriting `T`, leaving an earlier tension vector in the output.
 
-No tension distribution method uses a previous solution as a warm start. QP caches only its constant options object. X-ACTA caches only its validated constants/options record. Neither retains a position, force, tension vector, or factorization between calls.
+No method uses a previous solution as a warm start. QP caches only its constant options object; X-ACTA caches only its validated constants/options record. Neither retains position, force, tensions, or a factorization between calls.
 
 </details>
 
@@ -80,28 +80,28 @@ No tension distribution method uses a previous solution as a warm start. QP cach
 | `exitflag` | Scalar, when present | — | Solver status; its meaning depends on the method |
 | `scale_dir` | Scalar | — | Method-specific diagnostic; see the relevant section below |
 
-**Check the output, the status, and the physics together.** A finite tension vector or a status flag alone does not establish a valid solution. Some routines can raise an error, return nonfinite values, or omit output fields for difficult inputs.
+A finite tension vector or status flag alone does not establish validity. Routines may raise errors, return nonfinite values, or omit output fields for difficult inputs.
 
-To check that a returned vector reproduces a particular target:
+Acceptance for a specified target requires:
 
-1. Confirm that `T` exists, is numeric, real and finite, and contains four elements.
-2. Check that the maximum tension-bound violation is at most **`1e-9` N**.
-3. Check that `norm(W*T-F_target,2)` is at most **`1e-8` N**.
-4. For QP, ACTA and X-ACTA, also require a positive `exitflag`.
+1. `T` exists, is numeric, real and finite, and contains four elements.
+2. Maximum tension-bound violation is at most `1e-9` N.
+3. `norm(W*T-F_target,2)` is at most `1e-8` N.
+4. QP, ACTA and X-ACTA return a positive `exitflag`.
 
-The bound violation is `max([0; lim_inf-T; T-lim_sup])`. These physical checks are separate from each solver's internal stopping rule.
+The bound violation is `max([0; lim_inf-T; T-lim_sup])`. These physical criteria are independent of the internal stopping rules.
 
-WEC may adjust the requested force, and X-ACTA's extended stage permits force error. Therefore, also inspect **`norm(W*T-F_raw,2)` against the original request**. A bounded, converged output and exact reproduction of the original force are different properties. In particular, X-ACTA can converge without meeting the original-force equality check.
+WEC may adjust the request, and X-ACTA's extended stage permits force error. The original-force residual `norm(W*T-F_raw,2)` must therefore be assessed separately. Bounded convergence does not imply reproduction of the original force; X-ACTA can converge without satisfying that equality check.
 
-`scale_dir` has no single meaning across methods. A fallback flag is not an optimality certificate. Case numbers, status flags and iteration counts are dimensionless.
+`scale_dir` is method-specific, and a fallback flag does not certify optimality. Case numbers, status flags, and iteration counts are dimensionless.
 
 ## Direct Method
 
 [Source: `wt_direct.m`](../src/wt_direct.m) · [Mathematical reference](METHOD_SOURCES.md#direct-method)
 
-**Purpose:** minimize the actual cable-tension L2 norm for a feasible target in the stated four-cable domain. The method forms a particular solution and null-space basis, chooses a geometric configuration, and evaluates at most two clipped scalar minima. It does not call WEC internally.
+The Direct Method minimizes the actual cable-tension L2 norm for a feasible target in the stated four-cable domain. It forms a particular solution and null-space basis, selects a geometric configuration, and evaluates at most two clipped scalar minima. It does not call WEC internally.
 
-The basis and particular solution are placed back in the original cable rows, so the returned `T` needs no inverse permutation.
+The basis and particular solution use the original cable rows; the returned `T` requires no inverse permutation.
 
 | Diagnostic | Meaning |
 | --- | --- |
@@ -111,14 +111,14 @@ The basis and particular solution are placed back in the original cable rows, so
 | `scale_dir = 1` | Double saturation or an empty candidate interval |
 | `scale_dir = 0` | No such diagnostic; still apply the physical checks |
 
-Branches marked by `scale_dir = 1` retain a candidate; they do not invoke a fallback optimizer.
+Branches with `scale_dir = 1` retain a candidate without invoking a fallback optimizer.
 
 <details>
 <summary>Numerical and diagnostic details</summary>
 
 There are no iterative stopping options. Interval consistency uses `1e-12`.
 
-With `verbose=true`, the function also returns `theta_q` and `theta_alphamin` in radians and dimensionless `N1dotN2`. Computing these diagnostics adds a 2 × 2 solve and two `atan2` evaluations. Use `verbose=false` for ordinary calls.
+With `verbose=true`, additional outputs are `theta_q` and `theta_alphamin` in radians, and dimensionless `N1dotN2`. These diagnostics add a 2 × 2 solve and two `atan2` evaluations. Ordinary calls use `verbose=false`.
 
 </details>
 
@@ -126,7 +126,7 @@ With `verbose=true`, the function also returns `theta_q` and `theta_alphamin` in
 
 [Source: `wt_pott.m`](../src/wt_pott.m) · [Mathematical reference](METHOD_SOURCES.md#icfm)
 
-**Purpose:** calculate a bounded tension distribution by projecting the tension midpoint with `pinv`, then clamping and removing violating cables in at most three nested steps. Lower-bound tests precede upper-bound tests. This procedure is not a general L2-optimality certificate.
+ICFM projects the tension midpoint with `pinv`, then clamps and removes violating cables in at most three nested steps. Lower-bound tests precede upper-bound tests. This procedure does not certify general L2 optimality.
 
 | Additional output | Meaning |
 | --- | --- |
@@ -136,15 +136,15 @@ With `verbose=true`, the function also returns `theta_q` and `theta_alphamin` in
 | `case` | `NaN` |
 | `param.M_eff` | Copy of the anchor matrix `M` |
 
-No iterative tolerance or iteration budget is exposed. MATLAB's default `pinv` rank tolerance is used.
+No iterative tolerance or iteration budget is exposed; `pinv` uses MATLAB's default rank tolerance.
 
 ## Bounded QP
 
 [Source: `wt_qp_bounded.m`](../src/wt_qp_bounded.m) · [Backend reference](METHOD_SOURCES.md#bounded-qp)
 
-**Purpose:** minimize `0.5*T'*T` subject to force equilibrium `W*T=F` and both tension bounds, using MATLAB `quadprog`. Both bounds are retained even when the target is infeasible.
+Bounded QP uses MATLAB `quadprog` to minimize `0.5*T'*T` subject to `W*T=F` and both tension bounds. Both bounds are retained for infeasible targets.
 
-The solver uses **active-set**. Every call starts at `x0 = lim_inf(:)`: `[3.8; 3.8; 3.8; 3.8]` N in the example. This fixed starting vector satisfies the bounds, but may not satisfy equilibrium. `quadprog` performs its feasibility phase when needed.
+The active-set solver starts each call at `x0 = lim_inf(:)`: `[3.8; 3.8; 3.8; 3.8]` N in the example. This fixed vector satisfies the bounds but may violate equilibrium, requiring the `quadprog` feasibility phase.
 
 | Setting | Value |
 | --- | --- |
@@ -155,7 +155,7 @@ The solver uses **active-set**. Every call starts at `x0 = lim_inf(:)`: `[3.8; 3
 | `MaxIterations` | `200` |
 | `Display` | `off` |
 
-Other options use the installed MATLAB defaults. The documented environment is MATLAB R2024b Update 4 with Optimization Toolbox 24.2; library releases can affect iteration counts and numerical output.
+Other options retain the installed MATLAB defaults. The documented environment is MATLAB R2024b Update 4 with Optimization Toolbox 24.2. Library releases can affect iteration counts and numerical output.
 
 <details>
 <summary>Returned diagnostics and failure handling</summary>
@@ -171,7 +171,7 @@ Other options use the installed MATLAB defaults. The documented environment is M
 | `scale_dir` | `0` only for positive status, bound violation ≤ `1e-9` N, and force error ≤ `1e-8` N; otherwise `-1` |
 | `case` | `NaN` |
 
-On failure, `T` may be empty or contain the last iterate. Errors from `quadprog` are not hidden by the wrapper.
+On failure, `T` may be empty or contain the last iterate. Errors from `quadprog` propagate through the wrapper.
 
 </details>
 
@@ -179,9 +179,9 @@ On failure, `T` may be empty or contain the last iterate. Errors from `quadprog`
 
 [Source: `wt_gouttefarde.m`](../src/wt_gouttefarde.m) · [Mathematical reference](METHOD_SOURCES.md#vtda-l2)
 
-**Purpose:** search the feasible polygon in the two-dimensional null space for a minimum-norm tension vector. The function computes `null(W)`, forms an explicit generalized inverse, and evaluates polygon vertices and edges.
+VTDA-L2 searches the feasible polygon in the two-dimensional null space for a minimum-norm tension vector. It computes `null(W)`, forms an explicit generalized inverse, and evaluates polygon vertices and edges.
 
-The polygon walk permits **100 visits** and returns before processing visit 101. It may return without `T` or propagate an error. Always pass fresh parameters and inspect the returned output.
+The polygon walk permits 100 visits and returns before visit 101. The routine may return without `T` or propagate an error; fresh parameters and output checks are required.
 
 | Additional output | Meaning |
 | --- | --- |
@@ -196,9 +196,9 @@ There is no rank regularization. Geometric, closure and final bound tests use `T
 
 [Source: `wt_acta.m`](../src/wt_acta.m) · [Mathematical reference](METHOD_SOURCES.md#acta)
 
-**Purpose:** find the analytic centre of the feasible tension set. ACTA minimizes the strict log-barrier objective while enforcing `W*T=F`. It starts at the tension midpoint with `lambda=0` on every call.
+ACTA finds the analytic centre of the feasible tension set by minimizing the strict log barrier subject to `W*T=F`. Each call starts at the tension midpoint with `lambda=0`.
 
-**Strict feasibility is required.** A force that can only be produced by tensions on the bounds does not supply an analytic centre.
+Strict feasibility is required: a force attainable only at tension bounds does not supply an analytic centre.
 
 | `exitflag` | Meaning |
 | --- | --- |
@@ -207,7 +207,7 @@ There is no rank regularization. Geometric, closure and final bound tests use `T
 | `-1` | Singular-system safeguard |
 | `-3` | Line-search safeguard |
 
-A budget failure does not establish infeasibility. `T` contains the last iterate; `iter` counts accepted Newton updates, and `resid` contains the stopping norm. `scale_dir` is `0` for converged, in-bounds output, `-1` for nonconvergence, and `1` for a bound violation. `case` is `NaN`.
+An iteration-budget failure does not establish infeasibility. `T` is the last iterate, `iter` counts accepted Newton updates, and `resid` is the stopping norm. `scale_dir` is `0` for converged, in-bounds output, `-1` for nonconvergence, and `1` for a bound violation. `case` is `NaN`.
 
 <details>
 <summary>Objective, options and convergence rule</summary>
@@ -234,7 +234,7 @@ The stopping test is:
 norm([grad(phi) + W'*lambda; W*T-F], 2) <= tol
 ```
 
-This combines stationarity and force-equilibrium residuals. It is an **absolute combined KKT test**, not a force-only test or X-ACTA's scaled test. A 2 × 2 Schur determinant safeguard uses `1e-12*S(1,1)*S(2,2)`.
+This absolute combined KKT test includes stationarity and force equilibrium; it differs from a force-only test and X-ACTA's scaled test. The 2 × 2 Schur determinant safeguard uses `1e-12*S(1,1)*S(2,2)`.
 
 </details>
 
@@ -242,9 +242,9 @@ This combines stationarity and force-equilibrium residuals. It is an **absolute 
 
 [Source: `wt_xacta.m`](../src/wt_xacta.m) · [Mathematical reference](METHOD_SOURCES.md#x-acta)
 
-**Purpose:** calculate tensions for the original force request, including cases requiring force error to keep tensions strictly within their bounds. It does not require WEC preprocessing.
+X-ACTA calculates tensions for the original force request, permitting force error when needed to maintain strict tension bounds. It does not require WEC preprocessing.
 
-The relaxed analytic-centre stage (**RAC**) first seeks a solution with exact force equilibrium. If needed, the extended analytic-centre stage (**EAC**) introduces a penalized force-error variable. An unsuccessful RAC stage prevents EAC from running. The final tension vector is never clipped.
+The relaxed analytic-centre stage (RAC) seeks exact force equilibrium. When activated, the extended analytic-centre stage (EAC) introduces a penalized force-error variable. RAC failure prevents EAC from running. The final tension vector is never clipped.
 
 | `exitflag` | Meaning |
 | --- | --- |
@@ -254,12 +254,12 @@ The relaxed analytic-centre stage (**RAC**) first seeks a solution with exact fo
 | `-2` | Nonfinite state |
 | `-3` | Line-search failure |
 
-`stage` is `1` for RAC or `2` for EAC. `scale_dir` is `0` for final flag `1`, otherwise `-1`; `case` is `NaN`. Because EAC allows force error, **native convergence can coexist with nonzero original-force error**.
+`stage` is `1` for RAC or `2` for EAC. `scale_dir` is `0` for final flag `1`, otherwise `-1`; `case` is `NaN`. EAC convergence can coexist with nonzero original-force error.
 
 <details>
 <summary>Stages, initialization and options</summary>
 
-RAC minimizes a relaxed log barrier with `W*T=F`, using an affine midpoint projection and null-coordinate Newton iteration. With `k2=1`, the out-of-domain barrier extension is quadratic. Activation is calculated from the RAC solution:
+RAC minimizes a relaxed log barrier with `W*T=F`, using an affine midpoint projection and null-coordinate Newton iteration. With `k2=1`, the out-of-domain extension is quadratic. Activation follows from the RAC solution:
 
 ```text
 shrunk = clip(T_RAC, lo+delta, hi-delta)
@@ -267,7 +267,7 @@ distance = abs(T_RAC-shrunk)
 mu = tanh(sum(distance.^(k3+1)))
 ```
 
-If no distance is positive, RAC is final. Otherwise, EAC minimizes the true log barrier plus `eta*norm(s)^2 + gamma*norm(mu*s)^2`, subject to `W*T + mu*s = F` and strict bounds. EAC starts from the same call's RAC result if it is interior, otherwise from the shrunken projection. Both stages use unit barrier weights.
+If no distance is positive, RAC is final. Otherwise, EAC minimizes the true log barrier plus `eta*norm(s)^2 + gamma*norm(mu*s)^2`, subject to `W*T + mu*s = F` and strict bounds. EAC starts from the same call's interior RAC result or, if necessary, its shrunken projection. Both stages use unit barrier weights.
 
 Optional fields in `WDM.xacta`:
 
@@ -283,7 +283,7 @@ Optional fields in `WDM.xacta`:
 | `alpha`, `beta` | `0.01`, `0.5` | Line-search parameters |
 | `maxls` | `60` | Maximum line-search index; permits 61 trials, indexed 0–60 |
 
-`rac_maxit` and `eac_maxit` can override `maxit` separately. EAC uses a `0.99` fraction-to-boundary safeguard. Inputs and options are validated: `k2`, `k3` and budgets must be positive integers, and `delta` must be below half the smallest tension range. Unknown options raise errors.
+`rac_maxit` and `eac_maxit`, when supplied, override `maxit` separately. EAC uses a `0.99` fraction-to-boundary safeguard. Input and option validation requires positive integers for `k2`, `k3`, and budgets, and `delta` below half the smallest tension range. Unknown options raise errors.
 
 </details>
 
@@ -314,14 +314,14 @@ c = mu^2/(2*a)
 s = -mu*lambda/(2*a)
 ```
 
-EAC's `primal_resid` measures **augmented equilibrium**, not equality to the original force. The Schur formulation avoids division by `mu` near zero. The relative stationarity allowance does not loosen the independent force tests.
+EAC's `primal_resid` measures augmented equilibrium rather than equality to the original force. The Schur formulation avoids division by `mu` near zero. The relative stationarity allowance leaves the independent force criteria unchanged.
 
 </details>
 
 <details>
 <summary>Additional returned values</summary>
 
-Here `n` is the number of force coordinates and `m` the number of cables; the example uses `n=2`, `m=4`.
+`n` denotes force coordinates and `m` cables; the example uses `n=2`, `m=4`.
 
 | Output | Shape or meaning |
 | --- | --- |
@@ -350,15 +350,15 @@ If EAC does not run, its residuals and flag are `NaN` and its work counts are ze
 
 [Source: `WEC.m`](../src/WEC.m) · [Mathematical reference](METHOD_SOURCES.md#wec)
 
-**Purpose:** adjust a requested force using the forces attainable within the cable-tension bounds. WEC returns a force, **not cable tensions**.
+WEC adjusts a requested force to the set attainable within the cable-tension bounds. It returns a force, not cable tensions.
 
 ```matlab
 [F_NEW, IS_SCALED] = WEC(WDM, P, F);
 ```
 
-`F_NEW` is a 2 × 1 force vector in N. `IS_SCALED` is the routine's scalar change flag; use `norm(F_NEW-F,2)` to measure the actual force change.
+`F_NEW` is a 2 × 1 force vector in N. `IS_SCALED` is a scalar change flag; the actual force change is measured by `norm(F_NEW-F,2)`.
 
-For each call, WEC forms the convex hull of the forces at the 16 tension-box vertices. For nonzero `F`, adjustment follows the **signed force line**, with the `TOLL_WEC` inward margin. It can increase the force magnitude or reverse its direction.
+Each call forms the convex hull of the forces at the 16 tension-box vertices. For nonzero `F`, adjustment follows the signed force line with the `TOLL_WEC` inward margin and may increase magnitude or reverse direction.
 
 | Situation | Behavior |
 | --- | --- |
@@ -367,13 +367,13 @@ For each call, WEC forms the convex hull of the forces at the 16 tension-box ver
 | Infeasible zero request | A nonzero fallback is used |
 | Force line does not intersect the attainable set | A `NaN` force and a warning are returned |
 
-Finite outputs still need attainable-force verification. Degenerate geometry can raise an error. Keep `verbose=false`: verbose mode opens a diagnostic plot and pauses execution.
+Finite outputs require attainable-force verification. Degenerate geometry can raise an error. Ordinary calls use `verbose=false`; verbose mode opens a diagnostic plot and pauses execution.
 
 ## Experimental forward kinematics
 
 [Source: `forward_kinematics.m`](../src/forward_kinematics.m) · [Source information](METHOD_SOURCES.md#experimental-forward-kinematics)
 
-**Purpose:** estimate end-effector position from four calibrated motor displacements, using the fixed adjacent cable pairs from the experimental controller.
+Forward kinematics estimates end-effector position from four calibrated motor displacements, using the experimental controller's fixed adjacent cable pairs.
 
 ```matlab
 P = forward_kinematics(M1, M2, M3, M4);
@@ -384,11 +384,11 @@ P = forward_kinematics(M1, M2, M3, M4);
 | `M1`…`M4` | Four real scalar doubles | mm | Calibrated motor displacements, in controller cable order |
 | `P` | 2 × 1 double | mm | Position `[x; y]` relative to the bottom-left corner |
 
-Inputs are assumed to have these types and dimensions; the function does not validate them. Encoder conversion at **150/4000 mm per count** and reference-offset calibration occur upstream in the controller.
+Input types and dimensions are assumed, not validated. Encoder conversion at 150/4000 mm per count and reference-offset calibration occur upstream in the controller.
 
 ### Controller coordinates and cable lengths
 
-The controller uses a **630 mm square**, with its origin at the bottom-left corner, +x right and +y up. Its cable order differs from the tension distribution example:
+The controller uses a 630 mm square, with the origin at the bottom-left corner, +x right and +y up. Its cable order differs from the tension distribution example:
 
 | Controller cable | Anchor | Position `[x, y]` in mm |
 | --- | --- | --- |
@@ -403,25 +403,25 @@ With `r0 = 630*sqrt(2)/2`, the absolute cable lengths are:
 r = [r0-M1; r0+M2; r0-M3; r0+M4];
 ```
 
-Subtract `[315;315]` from the returned position to obtain frame-centred coordinates. Reorder a controller cable vector with **`[1 4 3 2]`** for use in the tension distribution functions. The motor inputs themselves must retain their controller order and signs.
+Frame-centred coordinates are obtained by subtracting `[315;315]` from the returned position. Controller cable vectors are reordered with `[1 4 3 2]` for the tension distribution functions. Motor inputs must retain their controller order and signs.
 
 ### Circle intersections and point selection
 
-The function always uses the four adjacent pairs **(1,2), (2,3), (3,4), (4,1)**. In each local frame, the second anchor is at `[0;d]`. Subtracting the circle equations gives:
+The four fixed adjacent pairs are (1,2), (2,3), (3,4), and (4,1). In each local frame, the second anchor is at `[0;d]`. Subtracting the circle equations gives:
 
 ```text
 y = (ri^2 + d^2 - rj^2)/(2*d)
 x = sqrt(ri^2 - y^2)
 ```
 
-The positive root selects the inward-facing intersection. Each point is transformed into the common coordinate system, and the retained points are averaged with equal weights. The intended geometric domain is inside the frame. **There is no quadrant-dependent pair selection or explicit error-propagation weighting.**
+The positive root selects the inward-facing intersection. Retained points are transformed into common coordinates and averaged with equal weights. The intended domain is inside the frame. There is no quadrant-dependent pair selection or explicit error-propagation weighting.
 
 ### Invalid intersections
 
 Points containing `NaN` are omitted. If none remain, the output is `NaN`. There is no persistent state, previous-position fallback, returned status flag, or explicit input-length validation.
 
-The generated real-valued controller uses real square roots, so a negative argument produces `NaN` and the pair is omitted. Standalone MATLAB can instead return a complex root, which the `NaN` check does not exclude. **For standalone use, supply positive lengths with real adjacent-circle intersections and check that the returned position is real and finite.** This domain check is not a measurement-accuracy guarantee.
+In the generated real-valued controller, a negative square-root argument produces `NaN` and the pair is omitted. Standalone MATLAB may return a complex root, which the `NaN` check does not exclude. Standalone use requires positive lengths, real adjacent-circle intersections, and a real, finite returned position. These domain checks do not guarantee measurement accuracy.
 
-The source also calculates diagonal candidates for pairs (1,3) and (2,4), using the constant `892` mm. Neither these candidates nor their selection affect the returned adjacent-pair mean.
+Diagonal candidates for pairs (1,3) and (2,4) use the constant `892` mm. Neither these candidates nor their selection affects the returned adjacent-pair mean.
 
-Forward kinematics estimates position only; it does not calculate tensions or check tension bounds. Supply its position estimate separately to a tension distribution function. Try the [forward-kinematics example](../README.md#experimental-forward-kinematics).
+Forward kinematics neither calculates tensions nor checks tension bounds. Its position estimate is a separate input to tension distribution. See the [forward-kinematics example](../README.md#experimental-forward-kinematics).
