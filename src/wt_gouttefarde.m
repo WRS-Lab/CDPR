@@ -14,7 +14,7 @@ function WDM=wt_gouttefarde(WDM,P,F)
 %   F                 2-by-1 requested Cartesian force [N].
 % W has unit directions from P to the anchors; the sign convention is W*T=F.
 % Return a new output struct from a fresh parameter struct on each call.
-% See docs/FUNCTION_REFERENCE.txt for the complete common contract and checks.
+% See docs/FUNCTION_REFERENCE.md for the complete common contract and checks.
 %
 % This four-cable implementation uses null(W), an explicit 2-by-2 generalized
 % inverse, and small linear solves. It has no rank regularization or WEC.

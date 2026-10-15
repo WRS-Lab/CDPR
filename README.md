@@ -28,7 +28,7 @@ Given an end-effector position and a feasible force request, the method:
 3. Converts the cable-tension bounds into feasible scalar intervals.
 4. Evaluates at most two clipped scalar candidates and returns the minimum-norm tension vector in the original cable order.
 
-See [`src/wt_direct.m`](src/wt_direct.m) for the implementation and references to the manuscript's equations and Algorithm 1. The [function reference](docs/FUNCTION_REFERENCE.txt) explains inputs, outputs, units, assumptions, and status fields.
+See [`src/wt_direct.m`](src/wt_direct.m) for the implementation and references to the manuscript's equations and Algorithm 1. The [function reference](docs/FUNCTION_REFERENCE.md) explains inputs, outputs, units, assumptions, and status fields.
 
 ## Try the other methods
 
@@ -48,7 +48,7 @@ comparison = run_example('all');
 | Analytic-centre ACTA | [`wt_acta.m`](src/wt_acta.m) |
 | Extended X-ACTA | [`wt_xacta.m`](src/wt_xacta.m) |
 
-The first five methods receive the same wrench-exertion-capability (WEC) target; X-ACTA receives the original force. WEC leaves this example's feasible request unchanged. ACTA and X-ACTA use analytic-centre objectives, which differ from DM's tension L2 objective. They are equation-based MATLAB implementations; equivalence to the original authors' software has not been established. The [method sources](docs/METHOD_SOURCES.txt) provide attribution.
+The first five methods receive the same wrench-exertion-capability (WEC) target; X-ACTA receives the original force. WEC leaves this example's feasible request unchanged. ACTA and X-ACTA use analytic-centre objectives, which differ from DM's tension L2 objective. They are equation-based MATLAB implementations; equivalence to the original authors' software has not been established. The [method sources](docs/METHOD_SOURCES.md) provide attribution.
 
 Bounded QP uses MATLAB's **active-set** algorithm, starting every cable at its minimum tension: `x0 = 3.8*ones(4,1)` in this example. The solver performs a feasibility phase when this initial vector does not satisfy force equilibrium.
 
@@ -71,8 +71,8 @@ Forward kinematics supplies a position estimate separately. Each tension distrib
 | --- | --- |
 | [`src/`](src/) | Tension distribution, WEC, and forward-kinematics functions |
 | [`examples/`](examples/) | Small runnable examples with equilibrium, bound, and position checks |
-| [Function reference](docs/FUNCTION_REFERENCE.txt) | Dimensions, units, cable ordering, solver settings, and returned statuses |
-| [Method sources](docs/METHOD_SOURCES.txt) | Mathematical references and implementation scope |
-| [Notices](NOTICES.txt) | Attribution and license information |
+| [Function reference](docs/FUNCTION_REFERENCE.md) | Dimensions, units, cable ordering, solver settings, and returned statuses |
+| [Method sources](docs/METHOD_SOURCES.md) | Mathematical references and implementation scope |
+| [Notices](NOTICES.md) | Attribution and license information |
 
 Returned tensions follow the anchor-column order. For other inputs, check the returned status, force equilibrium, and tension bounds together. WEC may change the requested force or return no valid target; its interface and assumptions are described in the function reference.

@@ -15,7 +15,7 @@ function [F_new, is_scaled] = WEC(WDM,P,F)
 %   F                 2-by-1 requested Cartesian force [N].
 % W has unit directions from P to the anchors; the sign convention is W*T=F.
 % Return a new output struct from a fresh parameter struct on each call.
-% See docs/FUNCTION_REFERENCE.txt for the complete common contract and checks.
+% See docs/FUNCTION_REFERENCE.md for the complete common contract and checks.
 %
 % Also requires WDM.param.TOLL_WEC, an inward force margin [N] (1e-9 in the
 % example setup). Equal cable bounds are required: only their first entries
@@ -36,7 +36,7 @@ function [F_new, is_scaled] = WEC(WDM,P,F)
 % false for numerical calls. Geometry/hull are rebuilt, with no lookup cache.
 % Method context: Boschetti, Passarini, Trevisani and Zanotto (2018), A fast
 % algorithm for wrench exertion capability computation, manuscript [34].
-% Implementation attribution is documented in docs/METHOD_SOURCES.txt.
+% Implementation attribution is documented in docs/METHOD_SOURCES.md.
 
 is_scaled = true;
 v = WDM.param.M-repmat(P,1,size(WDM.param.M,2));

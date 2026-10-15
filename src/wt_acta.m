@@ -14,7 +14,7 @@ function WDM=wt_acta(WDM,P,F)
 %   F                 2-by-1 requested Cartesian force [N].
 % W has unit directions from P to the anchors; the sign convention is W*T=F.
 % Return a new output struct from a fresh parameter struct on each call.
-% See docs/FUNCTION_REFERENCE.txt for the complete common contract and checks.
+% See docs/FUNCTION_REFERENCE.md for the complete common contract and checks.
 %
 % Each call starts at T=(lo+hi)/2, with zero equality multipliers. WDM.acta
 % may override tol, maxit, alpha, beta, maxls. Defaults: tol=1e-10 on the

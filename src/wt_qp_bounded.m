@@ -14,7 +14,7 @@ function WDM = wt_qp_bounded(WDM,P,F)
 %   F                 2-by-1 requested Cartesian force [N].
 % W has unit directions from P to the anchors; the sign convention is W*T=F.
 % Return a new output struct from a fresh parameter struct on each call.
-% See docs/FUNCTION_REFERENCE.txt for the complete common contract and checks.
+% See docs/FUNCTION_REFERENCE.md for the complete common contract and checks.
 %
 % Requires Optimization Toolbox. Geometry and H=I are rebuilt on each call.
 % The constant options object is cached per MATLAB process. Each call starts
@@ -37,7 +37,7 @@ function WDM = wt_qp_bounded(WDM,P,F)
 %   scale_dir        0 only for positive exitflag, bound violation<=1e-9 N
 %                    and force error<=1e-8 N; otherwise -1.
 % Diagnostic scalars remain NaN without a finite correctly sized T. Underlying
-% solver errors may propagate. See docs/METHOD_SOURCES.txt for references.
+% solver errors may propagate. See docs/METHOD_SOURCES.md for references.
 
 persistent options
 if isempty(options)

@@ -15,7 +15,7 @@ function WDM=wt_pott(WDM,P,F)
 %   F                 2-by-1 requested Cartesian force [N].
 % W has unit directions from P to the anchors; the sign convention is W*T=F.
 % Return a new output struct from a fresh parameter struct on each call.
-% See docs/FUNCTION_REFERENCE.txt for the complete common contract and checks.
+% See docs/FUNCTION_REFERENCE.md for the complete common contract and checks.
 %
 % The common bounds are read from the first vector entries during branching;
 % use equal bounds across cables. No WEC or force adjustment occurs here.
@@ -32,7 +32,7 @@ function WDM=wt_pott(WDM,P,F)
 % Check the result independently; scale_dir does not certify equilibrium.
 % No custom pinv tolerance, iterative stopping rule, or warm-start state is
 % used. Method reference: A. Pott (2014), manuscript reference [27]; see
-% docs/METHOD_SOURCES.txt for implementation attribution.
+% docs/METHOD_SOURCES.md for implementation attribution.
 
 Tmin=WDM.param.lim_inf;
 Tmax=WDM.param.lim_sup;

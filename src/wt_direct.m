@@ -15,7 +15,7 @@ function WDM=wt_direct(WDM,P,F)
 %   F                 2-by-1 requested Cartesian force [N].
 % W has unit directions from P to the anchors; the sign convention is W*T=F.
 % Return a new output struct from a fresh parameter struct on each call.
-% See docs/FUNCTION_REFERENCE.txt for the complete common contract and checks.
+% See docs/FUNCTION_REFERENCE.md for the complete common contract and checks.
 %
 % Use the fixed CCW anchor order and a position strictly inside the convex
 % anchor frame. Cyclic relabeling is not a general sort for unordered anchors
@@ -41,7 +41,7 @@ function WDM=wt_direct(WDM,P,F)
 % three ordering comparisons and seven sine evaluations. Configurations
 % II/III use the alpha2/alpha1 axis respectively; IV compares both candidates.
 % The zero-r branch returns the lower-bound tensions. The code has no
-% previous-solution warm start. See docs/METHOD_SOURCES.txt for attribution.
+% previous-solution warm start. See docs/METHOD_SOURCES.md for attribution.
 
 Tmin    = WDM.param.lim_inf(1);
 Tmax    = WDM.param.lim_sup(1);
