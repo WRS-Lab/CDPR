@@ -73,7 +73,6 @@ Forward kinematics supplies a position estimate separately. Each tension distrib
 | [`examples/`](examples/) | Small runnable examples with equilibrium, bound, and position checks |
 | [Function reference](docs/FUNCTION_REFERENCE.txt) | Dimensions, units, cable ordering, solver settings, and returned statuses |
 | [Method sources](docs/METHOD_SOURCES.txt) | Mathematical references and implementation scope |
-| [`provenance/`](provenance/) | Source identification and file hashes |
 | [Notices](NOTICES.txt) | Attribution and license information |
 
 Returned tensions follow the anchor-column order. For other inputs, check the returned status, force equilibrium, and tension bounds together. WEC may change the requested force or return no valid target; its interface and assumptions are described in the function reference.

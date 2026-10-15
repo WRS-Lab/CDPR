@@ -233,4 +233,4 @@ tension bounds. Supply its position estimate separately to the tension
 distribution functions.
 
 Example: addpath('examples'); position_result = run_forward_kinematics_example;
-Source identification: provenance/FORWARD_KINEMATICS_SOURCE.txt.
+Source information: docs/METHOD_SOURCES.txt.

@@ -37,7 +37,7 @@ function WDM = wt_qp_bounded(WDM,P,F)
 %   scale_dir        0 only for positive exitflag, bound violation<=1e-9 N
 %                    and force error<=1e-8 N; otherwise -1.
 % Diagnostic scalars remain NaN without a finite correctly sized T. Underlying
-% solver errors may propagate. See docs/METHOD_SOURCES.txt for provenance.
+% solver errors may propagate. See docs/METHOD_SOURCES.txt for references.
 
 persistent options
 if isempty(options)

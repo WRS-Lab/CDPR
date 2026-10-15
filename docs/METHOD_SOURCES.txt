@@ -3,9 +3,9 @@ METHOD SOURCES
 Implementation scope
 
 src/ contains the tension distribution functions, WEC preprocessing
-and the experimental forward-kinematics function. provenance/SOURCE_MANIFEST.csv lists source filenames, sizes and
-SHA-256 hashes. Function help text and FUNCTION_REFERENCE.txt describe the
-interfaces, assumptions, solver settings and returned statuses.
+and the experimental forward-kinematics function. Function help text and
+FUNCTION_REFERENCE.txt describe the interfaces, assumptions, solver settings
+and returned statuses.
 
 The references below identify mathematical methods. Equivalence to the
 original authors' software is not established for these MATLAB implementations.
@@ -88,14 +88,13 @@ and limitations are described in FUNCTION_REFERENCE.txt.
 
 Experimental forward kinematics -- forward_kinematics.m
 
-Extracted from CompleteSystem_RL_Final.slx.original, active MATLAB Function block
-"Actual Position/forward kinematics 2" (SID 5268). The source function is
-forward_kinematics_actual_position. It averages fixed adjacent circle-pair
-intersections, omitting points containing NaN. The standalone MATLAB and
+Used in the 2024 experimental controller, in the MATLAB Function block
+"Actual Position/forward kinematics 2" of CompleteSystem_RL_Final.slx.original.
+It averages fixed adjacent circle-pair intersections, omitting points containing
+NaN. The standalone MATLAB and
 real-valued generated-controller domain behavior is documented in its help.
 The public function name and comments are adapted for standalone use; the
-executable calculation is preserved. Model and script hashes are recorded in
-provenance/FORWARD_KINEMATICS_SOURCE.txt.
+executable calculation is preserved.
 
 Attribution limits
 
