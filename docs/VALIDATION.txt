@@ -23,7 +23,10 @@ satisfied. All six methods passed the comparison example; the largest
 equilibrium error was 3.97205e-15 N. QP, ACTA and X-ACTA returned positive
 native exit flags.
 
-Small benchmark and saved-data checks
+Saved-configuration small benchmark and saved-data checks
+
+The checks in this section used the saved experiment's interior-point-convex
+QP configuration. They are not a measurement of the current active-set QP.
 
   addpath('benchmark');
   capture = run_benchmark(fullfile(pwd,'smoke_results'));
@@ -58,10 +61,11 @@ Reported performance statistics use the full saved capture. A new full capture
 is an explicit, computationally expensive operation described in benchmark/.
 Observed maxima are measurements, not worst-case execution guarantees.
 
-Package verification checks that numerical operations, solver settings and
-timing boundaries match those used for the reported experiment. This checks
-the identity of the measured implementation; it does not establish equivalence
-to the original method authors' software.
+The saved experiment's source snapshots identify the measured implementation.
+The current QP function uses active-set with a minimum-tension initial point;
+the saved QP measurements use interior-point-convex. The independent acceptance
+criteria and public-call timing boundaries are the same. Source verification
+does not establish equivalence to the original method authors' software.
 
 provenance/SOURCE_MANIFEST.csv identifies the supplied MATLAB source files.
 provenance/PACKAGE_MANIFEST.csv records package-file sizes and SHA-256 hashes.
@@ -102,10 +106,36 @@ comments and whitespace differ from the identified controller script. These chec
 establish source preservation and offline geometric behavior; they do not
 measure experimental position accuracy or controller execution time.
 
-All seven previously supplied numerical source files, all benchmark files,
-the existing tension distribution example and FULL_DATA_INVENTORY.csv are
-byte-for-byte unchanged (17 files checked). No benchmark was rerun, and no
-saved benchmark result was modified. Forward kinematics remains outside all
-reported tension distribution timing boundaries.
+The forward-kinematics verification invoked no benchmark and modified no
+saved result. Forward kinematics remains outside all reported tension
+distribution timing boundaries. The QP solver configuration is documented
+separately above and in benchmark/SETTINGS_AND_TIMING.txt.
 
 MATLAB used for these checks: 24.2.0.2833386 (R2024b) Update 4.
+
+Active-set QP verification
+
+The public wt_qp_bounded function was tested from a clean folder in a fresh
+MATLAB session, with x0=lim_inf(:), Algorithm=active-set,
+ConstraintTolerance=1e-10, OptimalityTolerance=1e-10, StepTolerance=1e-12,
+MaxIterations=200 and Display=off. run_example, run_example('all') and
+run_forward_kinematics_example all passed from that folder.
+
+Thirty known feasible requests were constructed from six interior positions
+and five bounded tension vectors, including all-lower-bound, all-upper-bound
+and mixed-bound cases. All 30 returned positive native exit flags and passed
+the independent 1e-8 N force and 1e-9 N bound checks. The largest force error
+was 5.02429586778808e-15 N and the largest bound violation was
+1.77635683940025e-15 N. Relative to the saved-configuration
+interior-point implementation on the same requests, the largest tension-vector
+difference was 1.24440911001333e-10 N and largest absolute
+objective difference was 3.62035734724486e-10 N^2.
+An infeasible [1000;1000] N request at the frame centre returned exitflag=-2.
+
+These checks verify the public function's execution and physical acceptance
+on the selected requests. They are not a full benchmark or a timing comparison.
+The other six tension-distribution/WEC source files, forward kinematics,
+examples, saved-data analysis and FULL_DATA_INVENTORY.csv are unchanged.
+Only QP's solver selection, fixed initial point and explicit step tolerance
+change numerical execution. No saved observation was modified. A new full
+capture is required to make performance claims for active-set QP.

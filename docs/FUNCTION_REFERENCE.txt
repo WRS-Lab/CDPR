@@ -82,11 +82,20 @@ This implemented procedure is not a general L2-optimality certificate.
 Bounded QP: wt_qp_bounded
 
 Solves min 0.5*T'*T with equality W*T=F and both tension bounds. It always keeps
-both bounds, including on infeasible targets. quadprog uses interior-point-convex,
-ConstraintTolerance=1e-10, OptimalityTolerance=1e-10, MaxIterations=200, Display=off,
-and x0=[]. Other options are the installed-version defaults. The benchmark environment
-was MATLAB R2024b Update 4, Optimization Toolbox 24.2. Different library versions
-can alter iteration counts and numerical results.
+both bounds, including on infeasible targets. quadprog uses active-set,
+ConstraintTolerance=1e-10, OptimalityTolerance=1e-10, StepTolerance=1e-12,
+MaxIterations=200 and Display=off. Each call uses x0=lim_inf(:), a 4-by-1
+minimum-tension vector in the original cable order. With equal bounds this is
+f_min*ones(4,1), or [3.8;3.8;3.8;3.8] N in the example. It is a fixed start,
+not a previous-call solution. It satisfies the bounds but need not satisfy
+W*x0=F; quadprog performs its feasibility phase when needed. Other options
+are the installed-version defaults. Validated environment: MATLAB R2024b
+Update 4, Optimization Toolbox 24.2. Different library versions can alter
+iteration counts and numerical results.
+
+The documented saved benchmark instead used interior-point-convex with x0=[].
+That algorithm ignores user-supplied initial points. Those measurements are
+not active-set results; see benchmark/README.md for the saved configuration.
 Native exitflag and iter are returned; T may be empty or a last iterate on failure.
 objective is 0.5*T'*T [N^2]. resid is native firstorderopt when available, otherwise
 NaN. primal_resid is the force infinity norm [N]; bound_violation is in N.

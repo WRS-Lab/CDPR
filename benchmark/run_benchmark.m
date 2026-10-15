@@ -6,7 +6,10 @@ function result = run_benchmark(outputDir,options)
 %   'representative', 'full'), workers, pin_pcores, chunk_size and seed.
 %   Full explicitly selects 30,965,760 inputs and defaults to eight workers
 %   and the captured hardware-conditional affinity policy. Numerical solver
-%   settings and measured call boundaries are preserved in the captured code.
+%   settings come from the current src/ functions; sources are snapshotted.
+%   QP uses active-set with a fixed minimum-tension start. This differs from
+%   the documented saved interior-point QP experiment. Call boundaries are
+%   preserved; see benchmark/README.md before comparing measurements.
 %
 %   Requires MATLAB R2024b, Parallel Computing Toolbox, Optimization Toolbox,
 %   and Java. A newly created worker pool is closed on return; an existing

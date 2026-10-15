@@ -52,6 +52,8 @@ comparison = run_example('all');
 
 The first five methods receive a shared wrench-exertion-capability (WEC) target; X-ACTA receives the original force. WEC leaves this example's feasible request unchanged. ACTA and X-ACTA are equation-based MATLAB implementations, not verified copies of the original authors' software. Their analytic-centre objectives differ from DM's tension L2 objective. See the [method sources](docs/METHOD_SOURCES.txt) for attribution.
 
+Bounded QP uses MATLAB's **active-set** algorithm with every cable initialized at its minimum tension: `x0 = 3.8*ones(4,1)` in this example. The solver performs a feasibility phase when this initial vector does not satisfy force equilibrium.
+
 ## Requirements
 
 | Task | Dependencies |
@@ -78,6 +80,8 @@ The first five methods receive a shared wrench-exertion-capability (WEC) target;
 Returned tensions follow the original anchor-column order. A finite result or a native status flag alone does not establish success; independently check equilibrium and tension bounds. WEC can change an infeasible request's magnitude or signed direction, some force lines have no target, and zero requests have a separate fallback. Read the [function reference](docs/FUNCTION_REFERENCE.txt) before supplying different inputs.
 
 ## Benchmark reproduction
+
+The documented saved benchmark used QP's **interior-point-convex** algorithm with `x0=[]`. Its reported timings and success counts do not characterize the active-set implementation. New captures use the current source; see the [benchmark instructions](benchmark/README.md) for reproducing the saved solver configuration. Saved-data analysis does not rerun QP.
 
 ### Small capture and saved-data replay
 

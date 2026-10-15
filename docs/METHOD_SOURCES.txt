@@ -42,9 +42,14 @@ L2 optimality; see FUNCTION_REFERENCE.txt for its returned statuses.
 
 Bounded QP -- wt_qp_bounded.m
 
-The tested numerical backend is MATLAB quadprog, interior-point-convex,
-Optimization Toolbox 24.2 with MATLAB R2024b Update 4. The local wrapper solves
-min 0.5*T'*T with equality and both box bounds; see FUNCTION_REFERENCE for options.
+The numerical backend is MATLAB quadprog, active-set, Optimization Toolbox
+24.2 with MATLAB R2024b Update 4. The local wrapper solves min 0.5*T'*T with
+equality and both box bounds, starting each cable at its lower tension bound.
+See FUNCTION_REFERENCE for the initialization, feasibility phase and options.
+The documented saved benchmark used interior-point-convex with x0=[]. Its
+measurements do not describe active-set performance. MATLAB documents that
+interior-point-convex ignores user-supplied initial points:
+https://www.mathworks.com/help/releases/R2024b/optim/ug/quadprog.html
 The commercial MATLAB/toolbox implementation is not included here.
 
 ACTA -- wt_acta.m

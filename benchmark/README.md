@@ -4,6 +4,14 @@ This folder provides two distinct entry points. `run_benchmark` makes new timing
 
 The capture wrapper stages the harness in [captured/](captured/) beside the seven numerical functions in [src/](../src/). Each capture records source identities in its manifest. [`provenance/SOURCE_MANIFEST.csv`](../provenance/SOURCE_MANIFEST.csv) lists the package source files and their SHA-256 hashes.
 
+## QP configuration and the saved measurements
+
+New captures use `active-set` QP with `x0=lim_inf(:)`, equal to `3.8*ones(4,1)` for this geometry. The explicit settings are `ConstraintTolerance=1e-10`, `OptimalityTolerance=1e-10`, `StepTolerance=1e-12`, `MaxIterations=200` and `Display=off`. Initialization and any feasibility phase are inside the existing public-call timing boundary.
+
+The saved measurements documented below used `interior-point-convex` with `x0=[]`. They do not establish timings, success rates or tension-norm statistics for active-set. Saved-data reproduction continues to analyze those observations without calling the current solver.
+
+To rerun the solver configuration used for those measurements, download the [saved-configuration source archive](https://github.com/WRS-Lab/CDPR/archive/e454578a7b7069008d2bf3354343a08211be1b2c.zip), extract it into a separate folder, and run its README commands there. To measure active-set, use this package's `run_benchmark` command and a fresh output directory. Do not combine observations from the two configurations. No full active-set benchmark is included in this package.
+
 ## Quick test from the extracted package root
 
 Use fresh directory names for each attempt. These paths are portable MATLAB examples; neither wrapper contains a machine-specific input or output path.

@@ -17,10 +17,12 @@ function WDM = wt_qp_bounded(WDM,P,F)
 % See docs/FUNCTION_REFERENCE.txt for the complete common contract and checks.
 %
 % Requires Optimization Toolbox. Geometry and H=I are rebuilt on each call.
-% The constant options object is cached per MATLAB process; x0=[] and no
-% previous tension solution is reused. Benchmark options: interior-point-convex,
-% ConstraintTolerance=1e-10, OptimalityTolerance=1e-10, MaxIterations=200,
-% Display=off. Other quadprog options use the installed MATLAB defaults.
+% The constant options object is cached per MATLAB process. Each call starts
+% at x0=lim_inf(:), i.e. f_min*ones(4,1) for equal minimum tensions. No previous
+% tension solution is reused. Options: active-set, ConstraintTolerance=1e-10,
+% OptimalityTolerance=1e-10, StepTolerance=1e-12, MaxIterations=200, Display=off.
+% The start need not satisfy equilibrium; quadprog performs its feasibility
+% phase when needed. Other options use the installed MATLAB defaults.
 %
 % OUTPUTS (added to the returned WDM)
 %   T                Solution/last quadprog iterate [N]; may be empty on failure.
@@ -39,9 +41,9 @@ function WDM = wt_qp_bounded(WDM,P,F)
 
 persistent options
 if isempty(options)
-    options=optimoptions('quadprog','Algorithm','interior-point-convex', ...
+    options=optimoptions('quadprog','Algorithm','active-set', ...
         'Display','off','ConstraintTolerance',1e-10, ...
-        'OptimalityTolerance',1e-10,'MaxIterations',200);
+        'OptimalityTolerance',1e-10,'StepTolerance',1e-12,'MaxIterations',200);
 end
 W=WDM.param.M-P;
 for cable=1:size(W,2)
@@ -54,8 +56,10 @@ for cable=1:size(W,2)
         W(:,cable)=0;
     end
 end
+% Fixed minimum-tension start in the original cable order.
+x0=WDM.param.lim_inf(:);
 [T,objective,exitflag,details]=quadprog(eye(size(W,2)),[],[],[],W,F, ...
-    WDM.param.lim_inf,WDM.param.lim_sup,[],options);
+    WDM.param.lim_inf,WDM.param.lim_sup,x0,options);
 WDM.T=T;
 WDM.objective=objective;
 WDM.exitflag=exitflag;

@@ -1,4 +1,13 @@
-MEASURED SETTINGS AND TIMING BOUNDARIES
+SAVED-CAPTURE SETTINGS AND TIMING BOUNDARIES
+
+The measured settings below describe the documented saved experiment.
+The current public QP function and new captures use active-set with
+x0=lim_inf(:), ConstraintTolerance=1e-10, OptimalityTolerance=1e-10,
+StepTolerance=1e-12, MaxIterations=200 and Display=off. This fixed start is
+f_min*ones(4,1) for the common bound. Any feasibility phase is included in
+the existing QP public-call timing boundary. The saved interior-point QP
+measurements below must not be reported as active-set measurements.
+See benchmark/README.md for the saved-configuration source archive.
 
 Source and data identity
 
